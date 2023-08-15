@@ -14,7 +14,7 @@
 // Pick one up today at the Adafruit electronics shop
 // and help support open source hardware & software! -ada
 
-#include "../hal/Adafruit_GPS.h"
+#include <Adafruit_GPS.h>
 
 // what's the name of the hardware serial port?
 #define GPSSerial Serial1
