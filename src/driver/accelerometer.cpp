@@ -5,7 +5,7 @@
  
 Adafruit_MMA8451 mma = Adafruit_MMA8451();
  
-void setup(void) {
+void acc_setup(void) {
 Serial.begin(9600);
  
 Serial.println("Adafruit MMA8451 test!");
@@ -23,7 +23,7 @@ Serial.println("G");
  
 }
  
-void loop() {
+void acc_loop() {
 // Read the 'raw' data in 14-bit counts
 mma.read();
 Serial.print("X:\t"); Serial.print(mma.x);
