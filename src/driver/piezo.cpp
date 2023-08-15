@@ -1,12 +1,15 @@
 // Buzzer
 // buzzer make sounds
 /***********************************/
+
+#include "Arduino.h"
+
 int buzzer = 12;//the pin of the active buzzer
-void setup()
+void piezo_setup(void)
 {
- pinMode(buzzer,OUTPUT);//initialize the buzzer pin as an output
+  pinMode(buzzer,OUTPUT);//initialize the buzzer pin as an output
 }
-void loop()
+void piezo_loop(void)
 {
  unsigned char i; //define a variable
  while(1)

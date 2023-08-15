@@ -15,11 +15,14 @@
 // and help support open source hardware & software! -ada
 
 #include "driver/gps.h"
+#include "driver/piezo.h"
 
 void setup()
 {
   gps_setup();
+  piezo_setup();
 }
+
 
 void loop() // run over and over again
 {
