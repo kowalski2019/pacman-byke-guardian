@@ -29,6 +29,7 @@ Adafruit_GPS GPS(&GPSSerial);
 
 uint32_t timer = millis();
 
+// https://www.google.com/maps/place/39.724124908447N,16.516248703003E
 
 void gps_setup()
 {
@@ -36,7 +37,7 @@ void gps_setup()
 
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
-  Serial.begin(115200);
+  //Serial.begin(115200);
   Serial.println("Adafruit GPS library basic parsing test!");
 
   // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
@@ -102,9 +103,11 @@ void gps_loop() // run over and over again
     Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
     if (GPS.fix) {
       Serial.print("Location: ");
-      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
+      //Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
+      Serial.print(GPS.latitudeDegrees, 12); Serial.print(GPS.lat);
       Serial.print(", ");
-      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
+      Serial.print(GPS.longitudeDegrees, 12); Serial.println(GPS.lon);
+      //Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
       Serial.print("Speed (knots): "); Serial.println(GPS.speed);
       Serial.print("Angle: "); Serial.println(GPS.angle);
       Serial.print("Altitude: "); Serial.println(GPS.altitude);
