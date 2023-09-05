@@ -15,6 +15,7 @@
 // and help support open source hardware & software! -ada
 
 #include <Adafruit_GPS.h>
+#include "gps.h"
 
 // what's the name of the hardware serial port?
 #define GPSSerial Serial1

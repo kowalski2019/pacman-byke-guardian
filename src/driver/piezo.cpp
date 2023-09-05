@@ -2,7 +2,8 @@
 // buzzer make sounds
 /***********************************/
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include "piezo.h"
 
 int buzzer = 12;//the pin of the active buzzer
 void piezo_setup(void)

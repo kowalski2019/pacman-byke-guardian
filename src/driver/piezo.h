@@ -5,4 +5,4 @@ void piezo_setup(void);
 
 void piezo_loop(void);
 
-#endif /*_GPS_H*/
+#endif /*_PIEZO_H*/
