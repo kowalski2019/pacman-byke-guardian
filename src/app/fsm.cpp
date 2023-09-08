@@ -1,6 +1,6 @@
 #include "fsm.h"
 #include "freertos/FreeRTOS.h"
-//#include "HardwareSerial.h"
+// #include "HardwareSerial.h"
 
 /**
  * @brief Function to initialize the state machine
@@ -42,19 +42,19 @@ void handleEvent(StateMachine *machine, Event event)
     case STATE_IDLE: // byke is actualy moving
         if (event == EVENT_BIKE_IS_PARKING)
         {
-            //Serial.println("Transitioning from Idle to Active");
+            // Serial.println("Transitioning from Idle to Active");
             transitionState(machine, STATE_ACTIVE);
         }
         break;
     case STATE_READY: // system just started
         if (event == EVENT_BIKE_IS_MOVING)
         {
-            //Serial.println("Transitioning from Ready to Idle");
+            // Serial.println("Transitioning from Ready to Idle");
             transitionState(machine, STATE_IDLE);
         }
         else if (event == EVENT_BIKE_IS_PARKING)
         {
-            //Serial.println("Transitioning from Ready to Active");
+            // Serial.println("Transitioning from Ready to Active");
             transitionState(machine, STATE_ACTIVE);
         }
         else if (event == EVENT_TIMEOUT)
@@ -71,12 +71,12 @@ void handleEvent(StateMachine *machine, Event event)
     case STATE_ACTIVE:
         if (event == EVENT_BIKE_IS_MOVING)
         {
-            //Serial.println("Transitioning from Active to Idle.");
+            // Serial.println("Transitioning from Active to Idle.");
             transitionState(machine, STATE_IDLE);
         }
         else if (event == EVENT_LOCK_BIKE)
         {
-            //Serial.println("Transitioning from Active to Bike locked.");
+            // Serial.println("Transitioning from Active to Bike locked.");
             transitionState(machine, STATE_BIKE_LOCKED);
         }
         else
@@ -87,23 +87,25 @@ void handleEvent(StateMachine *machine, Event event)
     case STATE_BIKE_LOCKED:
         if (event == EVENT_UNLOCK_BIKE)
         {
-            //Serial.println("Transitioning from Bike Locked to Active.");
+            // Serial.println("Transitioning from Bike Locked to Active.");
             transitionState(machine, STATE_ACTIVE);
         }
         else if (event == EVENT_START_ALARM)
         {
-            //Serial.println("Transitioning from Bike Locked to Alarm.");
+            // Serial.println("Transitioning from Bike Locked to Alarm.");
             transitionState(machine, STATE_ALARM);
         }
         else
         {
+            transitionState(machine, STATE_ACTIVE);
         }
         break;
     case STATE_ALARM:
         if (event == EVENT_STOP_ALARM)
         {
-            //Serial.println("Transitioning from Alarm to Bike Locked.");
-            transitionState(machine, STATE_BIKE_LOCKED);
+            // Serial.println("Transitioning from Alarm to Bike Locked.");
+            //transitionState(machine, STATE_BIKE_LOCKED);
+            transitionState(machine, STATE_ACTIVE);
         }
         break;
     }
