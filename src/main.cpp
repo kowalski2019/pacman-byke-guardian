@@ -1,4 +1,3 @@
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -7,6 +6,7 @@
 
 #include "driver/gps.h"
 #include "driver/piezo.h"
+#include "driver/accelerometer.h"
 #include "app/fsm.h"
 
 // Use only core 1 for demo purposes
@@ -19,6 +19,8 @@ static const BaseType_t app_cpu = 1;
 #define STACK_SIZE 4096
 
 StateMachine machine;
+AccelerometerData acc_data;
+GPSData gps_data;
 
 /* Main Task to be created. */
 void mainTask(void *pvParameters)
@@ -27,13 +29,15 @@ void mainTask(void *pvParameters)
   pvParameters value in the call to xTaskCreate() below. */
   // configASSERT( ( ( uint32_t ) pvParameters ) == 1 );
 
-  std::string gps_location;
+  uint32_t print_acc_data = millis();
+
   transitionState(&machine, STATE_READY);
   for (;;)
   {
     /* Task code goes here. */
 
     // poll accelerometer data
+    accelerometer_poll_data(acc_data);
     // poll GSM data
 
     switch (machine.current_state)
@@ -44,23 +48,48 @@ void mainTask(void *pvParameters)
       handleEvent(&machine, EVENT_BIKE_IS_PARKING);
       break;
     case STATE_ACTIVE:
-      gps_location = gps_poll_location();
-      Serial.print("Location: ");
-      Serial.println(gps_location.c_str());
+      // poll GPS Data
+      gps_poll_data(gps_data);
+      if (gps_data.fix)
+      {
+        std::string loc = std::to_string(gps_data.latitudeDegrees) + gps_data.lat + ", " + std::to_string(gps_data.longitudeDegrees) + gps_data.lon;
+        Serial.print("Location: ");
+        Serial.println(loc.c_str());
+      }
+
+      handleEvent(&machine, EVENT_LOCK_BIKE);
+
       break;
     case STATE_BIKE_LOCKED:
       // check if the bike is moving
+      if (millis() - print_acc_data >= 2000)
+      {
+        print_acc_data = millis();
+        Serial.print("Accelerometer data: ");
+        Serial.print("X: \t");
+        Serial.print(acc_data.x_speed);
+        Serial.print(", Y: \t");
+        Serial.print(acc_data.y_speed);
+        Serial.println();
+      }
+      if (abs(acc_data.x_speed) > 0.50f)
+      {
+        handleEvent(&machine, EVENT_START_ALARM);
+      }
       break;
     case STATE_ALARM:
       // call the Piezo function to araise the alarm
+      piezo_loop();
+      // send GPS data by GSM
+      if (abs(acc_data.x_speed) >= 0.10f && abs(acc_data.x_speed) <= 0.20f)
+      {
+        handleEvent(&machine, EVENT_STOP_ALARM);
+      }
       break;
     default:
       break;
     }
-
-    //Serial.println("Task GPS-Tracker");
-
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
 
@@ -68,6 +97,7 @@ void setup()
 {
   gps_setup();
   piezo_setup();
+  accelerometer_setup();
 
   initStateMachine(&machine);
 

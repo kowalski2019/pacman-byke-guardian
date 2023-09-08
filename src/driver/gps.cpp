@@ -1,23 +1,4 @@
-// Test code for Ultimate GPS Using Hardware Serial (e.g. GPS Flora or FeatherWing)
-//
-// This code shows how to listen to the GPS module via polling. Best used with
-// Feathers or Flora where you have hardware Serial and no interrupt
-//
-// Tested and works great with the Adafruit GPS FeatherWing
-// ------> https://www.adafruit.com/products/3133
-// or Flora GPS
-// ------> https://www.adafruit.com/products/1059
-// but also works with the shield, breakout
-// ------> https://www.adafruit.com/products/1272
-// ------> https://www.adafruit.com/products/746
-//
-// Pick one up today at the Adafruit electronics shop
-// and help support open source hardware & software! -ada
-
-#include <Adafruit_GPS.h>
 #include "gps.h"
-
-
 
 // what's the name of the hardware serial port?
 #define GPSSerial Serial1
@@ -30,8 +11,6 @@ Adafruit_GPS GPS(&GPSSerial);
 #define GPSECHO false
 
 uint32_t timer = millis();
-
-// https://www.google.com/maps/place/39.724124908447N,16.516248703003E
 
 void gps_setup()
 {
@@ -60,10 +39,8 @@ void gps_setup()
   GPSSerial.println(PMTK_Q_RELEASE);
 }
 
-std::string gps_poll_location(void)
+void gps_poll_data(GPSData &gps_data)
 {
-   std::string location;
-
   // read data from the GPS in the
   char c = GPS.read();
   // if you want to debug, this is a good time to do it!
@@ -78,22 +55,28 @@ std::string gps_poll_location(void)
     // so be very wary if using OUTPUT_ALLDATA and trying to print out data
     Serial.print(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
     if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
-      return "";                       // we can fail to parse a sentence in which case we should just wait for another
+      return ;                    // we can fail to parse a sentence in which case we should just wait for another
   }
 
-  if (GPS.fix)
+  if (millis() - timer > 2000)
   {
-    Serial.println("Fix is there data can be fetch");
-    
-    Serial.print(GPS.latitudeDegrees, 12);
-    Serial.print(GPS.lat);
-    Serial.print(", ");
-    Serial.print(GPS.longitudeDegrees, 12);
-    Serial.println(GPS.lon);
-    location = std::to_string(GPS.latitudeDegrees) + GPS.lat + ", " + std::to_string(GPS.longitudeDegrees) + GPS.lon;
+    Serial.print("State Fix: ");
+    Serial.print((int)GPS.fix);
+    Serial.print(" quality: ");
+    Serial.println((int)GPS.fixquality);
+    timer = millis(); // reset the timer
+    if (GPS.fix)
+    {
+      gps_data.fix = true;
+      Serial.println("Fix is there data can be fetch!");
+      gps_data.latitudeDegrees = GPS.latitudeDegrees;
+      gps_data.lat = GPS.lat;
+      gps_data.longitudeDegrees = GPS.longitudeDegrees;
+      gps_data.lon = GPS.lon;
+    } else {
+      gps_data.fix = false;
+    }
   }
-
-  return location;
 }
 
 void gps_fetch_location() // run over and over again
