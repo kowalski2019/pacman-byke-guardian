@@ -5,6 +5,7 @@
 /* Self Includes */
 
 #include "driver/gps.h"
+#include "driver/gsm.h"
 #include "driver/piezo.h"
 #include "driver/accelerometer.h"
 #include "app/fsm.h"
@@ -21,6 +22,9 @@ static const BaseType_t app_cpu = 1;
 StateMachine machine;
 AccelerometerData acc_data;
 GPSData gps_data;
+
+static int x_before_lock;
+static int y_before_lock;
 
 /* Main Task to be created. */
 void mainTask(void *pvParameters)
@@ -57,6 +61,8 @@ void mainTask(void *pvParameters)
         Serial.println(loc.c_str());
       }
 
+      x_before_lock = acc_data.x;
+      y_before_lock = acc_data.y;
       handleEvent(&machine, EVENT_LOCK_BIKE);
 
       break;
@@ -67,12 +73,13 @@ void mainTask(void *pvParameters)
         print_acc_data = millis();
         Serial.print("Accelerometer data: ");
         Serial.print("X: \t");
-        Serial.print(acc_data.x_speed);
+        Serial.print(acc_data.x);
         Serial.print(", Y: \t");
-        Serial.print(acc_data.y_speed);
+        Serial.print(acc_data.y);
         Serial.println();
       }
-      if (abs(acc_data.x_speed) > 0.50f)
+      // ((abs(acc_data.x) - abs(x_before_lock)) > 10) TODO
+      if ((abs(acc_data.x_speed) > 1.0f))
       {
         handleEvent(&machine, EVENT_START_ALARM);
       }
@@ -81,7 +88,7 @@ void mainTask(void *pvParameters)
       // call the Piezo function to araise the alarm
       piezo_loop();
       // send GPS data by GSM
-      if (abs(acc_data.x_speed) >= 0.10f && abs(acc_data.x_speed) <= 0.20f)
+      if (abs(acc_data.x_speed) < 1.0f)
       {
         handleEvent(&machine, EVENT_STOP_ALARM);
       }
@@ -95,9 +102,12 @@ void mainTask(void *pvParameters)
 
 void setup()
 {
+  gsm_setup();
   gps_setup();
   piezo_setup();
   accelerometer_setup();
+
+  gsm_loop(); // just call the send SMS func to see if it work
 
   initStateMachine(&machine);
 

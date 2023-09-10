@@ -30,6 +30,9 @@ void accelerometer_setup(void)
 void accelerometer_poll_data(AccelerometerData &acc_data) {
     // Read the 'raw' data in 14-bit counts
     mma.read();
+    acc_data.x = mma.x;
+    acc_data.y = mma.y;
+    acc_data.z = mma.z;
     sensors_event_t event;
     mma.getEvent(&event);
     acc_data.x_speed = event.acceleration.x;
