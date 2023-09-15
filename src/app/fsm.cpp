@@ -104,8 +104,8 @@ void handleEvent(StateMachine *machine, Event event)
         if (event == EVENT_STOP_ALARM)
         {
             // Serial.println("Transitioning from Alarm to Bike Locked.");
-            //transitionState(machine, STATE_BIKE_LOCKED);
-            transitionState(machine, STATE_ACTIVE);
+            transitionState(machine, STATE_BIKE_LOCKED);
+            //transitionState(machine, STATE_ACTIVE);
         }
         break;
     }

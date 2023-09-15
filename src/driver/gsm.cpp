@@ -1,16 +1,16 @@
 #include "gsm.h"
 
 // SIM card PIN (leave empty, if not defined)
-const char simPIN[] = "";
+const char simPIN[] = "1322";
 
-#define SMS_TARGET "+351XXXXXXXXX"
+#define SMS_TARGET "+4915510467386"
 
 // Configure TinyGSM library
 #define TINY_GSM_MODEM_SIM800   // Modem is SIM800
 #define TINY_GSM_RX_BUFFER 1024 // Set RX buffer to 1Kb
 
-#include <Wire.h>
 #include <TinyGsmClient.h>
+#include "utils/debug.h"
 
 // TTGO T-Call pins
 #define MODEM_RST 5
@@ -19,13 +19,10 @@ const char simPIN[] = "";
 #define MODEM_TX 17
 #define MODEM_RX 16
 
-// Set serial for debug console (to Serial Monitor, default speed 115200)
-#define SerialMon Serial
 // Set serial for AT commands (to SIM800 module)
 #define SerialAT Serial1
 
-// Define the serial console for debug prints, if needed
-// #define DUMP_AT_COMMANDS
+//HardwareSerial SerialGSM(0);
 
 #ifdef DUMP_AT_COMMANDS
 #include <StreamDebugger.h>
@@ -37,8 +34,6 @@ TinyGsm modem(SerialAT);
 
 void gsm_setup()
 {
-  // Set console baud rate
-  SerialMon.begin(115200);
 
   // Set modem reset, enable, power pins
   //pinMode(MODEM_PWKEY, OUTPUT);
@@ -50,15 +45,19 @@ void gsm_setup()
 
   // Set GSM module baud rate and UART pins
   SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
+
+  Serial.println(modem.getModemInfo());
   delay(3000);
 
   // Restart SIM800 module, it takes quite some time
   // To skip it, call init() instead of restart()
-  SerialMon.println("Initializing modem...");
+  Serial.println("Initializing modem...");
   modem.restart();
   // use modem.init() if you don't need the complete restart
 
   // Unlock your SIM card with a PIN if needed
+  Serial.print("Unlocking SIM Status: ");
+  Serial.println(modem.getSimStatus());
   if (strlen(simPIN) && modem.getSimStatus() != 3)
   {
     modem.simUnlock(simPIN);
@@ -71,17 +70,19 @@ void gsm_loop()
   String smsMessage = "Hello from ESP32!";
   if (modem.sendSMS(SMS_TARGET, smsMessage))
   {
-    SerialMon.println(smsMessage);
+    Serial.println(smsMessage);
+    debug_print_positiv();
   }
   else
   {
-    SerialMon.println("SMS failed to send");
+    Serial.println("SMS failed to send");
+    debug_print_negativ();
   }
   delay(1);
 }
 
 /*
-SoftwareSerial sim(10, 11);
+
 int _timeout;
 String _buffer;
 String number = "+4917658141497"; //-> change with your number

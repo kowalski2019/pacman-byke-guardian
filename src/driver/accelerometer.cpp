@@ -8,7 +8,7 @@ Adafruit_MMA8451 mma = Adafruit_MMA8451();
 
 void accelerometer_setup(void)
 {
-    Serial.begin(9600);
+    //Serial.begin(9600);
 
     Serial.println("Adafruit MMA8451 test!");
 
